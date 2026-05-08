@@ -23,7 +23,7 @@ jobs:
   improve_triage:
     name: Improve triage skill with Oz
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.issue.pull_request == null && contains(github.event.comment.body, '@oz-agent') && contains(github.event.comment.body, 'triage')) }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.issue.pull_request == null && contains(github.event.comment.body, '@oz-agent')) }}
     env:
       ISSUE_NUMBER: ${{ github.event.issue.number || github.event.inputs.issue_number }}
       FEEDBACK: ${{ github.event.comment.body || github.event.inputs.feedback }}
@@ -47,7 +47,7 @@ jobs:
           prompt: |
             You are running in a GitHub Actions self-improvement workflow for issue triage in ${{ github.repository }}.
 
-            A maintainer left feedback for the triage agent. Use that feedback to make the smallest durable improvement that helps future issue triage runs.
+            A maintainer left feedback for the triage agent. This is a demo self-improvement run: treat one concrete maintainer comment as enough signal to make the smallest useful change that helps future issue triage runs.
 
             Trusted workflow context:
             - Triggering feedback: triage_feedback.json
@@ -61,7 +61,7 @@ jobs:
             - .agents/skills/triage-issue-local/SKILL.md
             - files under .github/issue-triage/
 
-            Do not edit .agents/skills/triage-issue/SKILL.md. Do not commit, push, create a branch, post comments, or open a pull request; the workflow will validate and publish any change. If the feedback is too specific or not useful as a repeatable triage heuristic, leave the working tree unchanged.
+            Do not edit .agents/skills/triage-issue/SKILL.md. Do not commit, push, create a branch, post comments, or open a pull request; the workflow will validate and publish any change. Prefer making a concise repo-local triage guidance update over leaving the working tree unchanged when the feedback can reasonably be interpreted as a future heuristic.
           warp_api_key: ${{ secrets.WARP_API_KEY }}
           share: team
 
@@ -113,5 +113,5 @@ jobs:
           if [ "${{ steps.guard.outputs.has_changes }}" = "true" ]; then
             gh issue comment "$ISSUE_NUMBER" --body "Opened a self-improvement PR for future issue triage: ${{ steps.create_pr.outputs.pull-request-url }}"
           else
-            gh issue comment "$ISSUE_NUMBER" --body "I reviewed this triage feedback, but did not find a repeatable repo-specific heuristic to add yet."
+            gh issue comment "$ISSUE_NUMBER" --body "I reviewed this feedback, but did not find a safe repo-specific triage guidance update to make."
           fi

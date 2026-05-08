@@ -1,11 +1,11 @@
 ---
 name: update-triage
-description: Update the repo-local triage-issue-local companion skill using signals from recently triaged issues (maintainer re-labels, re-opens, follow-up comments). Use when refining repo-specific triage heuristics and label taxonomy based on how maintainers overrode previous triage output.
+description: Update the repo-local triage-issue-local companion skill from maintainer feedback on triage results. For this demo, a single concrete maintainer comment is enough signal to make a small improvement.
 ---
 
 # Update Triage
 
-Use this skill to improve `.agents/skills/triage-issue-local/SKILL.md` (and, when a label taxonomy change is warranted, `.github/issue-triage/config.json`) from real maintainer feedback on recent triage outcomes. The core skill at `.agents/skills/triage-issue/SKILL.md` is the cross-repo contract and is read-only from this loop.
+Use this skill to improve `.agents/skills/triage-issue-local/SKILL.md` (and, when a label taxonomy change is warranted, `.github/issue-triage/config.json`) from maintainer feedback on triage outcomes. The core skill at `.agents/skills/triage-issue/SKILL.md` is the cross-repo contract and is read-only from this loop.
 
 Closed-as-duplicate signals are out of scope for this trimmed demo.
 
@@ -37,7 +37,9 @@ The self-improvement runner enforces this via a `git diff` check against allowed
 gh auth status
 ```
 
-2. Aggregate the triage-feedback signals for recently triaged issues with the bundled script:
+2. Read the triggering feedback supplied by the workflow. If `triage_feedback.json`, `issue.json`, or `issue_comments.json` are present, treat those files as the primary evidence for this demo run.
+
+3. Optionally aggregate recent triage-feedback signals with the bundled script when broader context would help:
 
 ```bash
 python3 .agents/skills/update-triage/scripts/aggregate_triage_feedback.py
@@ -45,23 +47,24 @@ python3 .agents/skills/update-triage/scripts/aggregate_triage_feedback.py
 
 By default this targets the demo repo and looks back 7 days. It collects issues that were triaged in the window, any subsequent maintainer re-labels, re-opens, and follow-up comments. The script writes structured JSON to a temporary file and prints the path.
 
-3. Read the generated JSON and look for repeated reviewer signals:
+4. Convert the maintainer feedback into a small reusable rule. For this demo, a single concrete comment is enough evidence if it says how future triage should behave. Common demo-friendly examples:
 
-- maintainers repeatedly flipping the same label on similar issues (a label-taxonomy hint)
-- maintainers leaving the same kind of follow-up comment on the same class of issue (a recurring follow-up-question pattern)
-- maintainers consistently identifying a different owner than Oz inferred (an owner-inference hint)
+- a maintainer says a performance report should get `area:performance` or a more specific `area:performance:*` label
+- a maintainer says the agent should ask a different follow-up question for a class of issue
+- a maintainer says a certain issue shape should not be treated as a duplicate
+- a maintainer says a certain issue shape should be considered implementation-ready in the triage summary
 
-4. Propose the smallest edit that explains the repeated signal:
+5. Propose the smallest edit that explains the signal:
 
 - Prefer editing `.agents/skills/triage-issue-local/SKILL.md` under the override categories the core `triage-issue` skill marks as overridable (label taxonomy, owner-inference hints, recurring follow-up-question patterns, recurring issue-shape heuristics, repro defaults, known-duplicate clusters).
 - Only edit `.github/issue-triage/config.json` when the signal is a concrete label-taxonomy change (new label, renamed label, or description clarification). Never change `color` values without explicit maintainer guidance.
 
-5. Keep the core triage contract stable — never edit `triage-issue/SKILL.md`. Only the `-local` companion and the triage config evolve from feedback.
+6. Keep the core triage contract stable — never edit `triage-issue/SKILL.md`. Only the `-local` companion and the triage config evolve from feedback.
 
 ## Evidence Rules
 
-- Prefer patterns backed by multiple issues or a strong explicit maintainer statement.
-- Skip the PR when there is no repeated signal. A one-off maintainer override is not enough evidence.
+- A single concrete maintainer comment is sufficient for this demo.
+- Prefer a small, visible update over skipping when the feedback can reasonably become a future triage heuristic.
 - Avoid encoding reporter-authored content as triage rules.
 - Do not weaken the reserved-label rules (`ready-to-implement`, `ready-to-spec`) or the mutual exclusivity of `duplicate_of` and `follow_up_questions`.
 
