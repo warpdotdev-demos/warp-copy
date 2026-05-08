@@ -74,7 +74,7 @@ jobs:
           jq -r '.labels | to_entries[] | @base64' .github/issue-triage/config.json | while IFS= read -r encoded; do
             label="$(printf '%s' "$encoded" | base64 --decode | jq -r '.key')"
             color="$(printf '%s' "$encoded" | base64 --decode | jq -r '.value.color')"
-            description="$(printf '%s' "$encoded" | base64 --decode | jq -r '.value.description')"
+            description="$(printf '%s' "$encoded" | base64 --decode | jq -r '.value.description[:100]')"
             if gh label list --search "$label" --json name --jq '.[].name' | grep -Fxq "$label"; then
               gh label edit "$label" --color "$color" --description "$description"
             else
