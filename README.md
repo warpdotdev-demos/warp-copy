@@ -51,6 +51,17 @@ Maintaining a popular open-source project? [Apply for Oz credits](https://tally.
 
 Oz for OSS is our partner program for bringing the same agentic open-source management workflows used in this repository to select partner repositories. We work directly with maintainers to implement workflows for issue triage, PR review, community management, and contributor coordination in a way that fits each project.
 
+### Oz issue triage demo
+
+This fork is trimmed down to the minimal Oz GitHub Actions demo:
+
+- `.github/workflows/oz-issue-triage.yml` runs the `triage-issue` skill when an issue is opened, reopened, edited, or manually dispatched.
+- `.agents/skills/triage-issue/SKILL.md` contains the reusable issue-triage contract imported from [`warpdotdev/oz-for-oss`](https://github.com/warpdotdev/oz-for-oss).
+- `.agents/skills/triage-issue-local/SKILL.md` contains Warp-specific triage heuristics that can evolve over time.
+- `.github/workflows/oz-triage-self-improvement.yml` listens for issue comments that mention `@oz-agent` and `triage`, then opens a PR to improve the local triage skill when the feedback is reusable.
+
+To run the demo, add a `WARP_API_KEY` Actions secret, enable GitHub Actions, and file a new issue. The triage workflow will post a structured triage comment and apply labels from `.github/issue-triage/config.json`.
+
 ## Licensing
 
 Warp's UI framework (the `warpui_core` and `warpui` crates) are licensed under the [MIT license](LICENSE-MIT).

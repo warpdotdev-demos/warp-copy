@@ -1,0 +1,117 @@
+name: Oz Triage Self-Improvement
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number containing triage feedback
+        required: true
+        type: string
+      feedback:
+        description: Feedback to use when improving triage
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  improve_triage:
+    name: Improve triage skill with Oz
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.issue.pull_request == null && contains(github.event.comment.body, '@oz-agent') && contains(github.event.comment.body, 'triage')) }}
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number || github.event.inputs.issue_number }}
+      FEEDBACK: ${{ github.event.comment.body || github.event.inputs.feedback }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect triage feedback context
+        run: |
+          gh api "repos/${{ github.repository }}/issues/${ISSUE_NUMBER}" > issue.json
+          gh api --paginate "repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments" > issue_comments.json
+          jq -n --arg body "$FEEDBACK" --arg issue "$ISSUE_NUMBER" '{issue_number: $issue, body: $body}' > triage_feedback.json
+
+      - name: Run triage self-improvement agent
+        uses: warpdotdev/oz-agent-action@v1
+        with:
+          skill: update-triage
+          prompt: |
+            You are running in a GitHub Actions self-improvement workflow for issue triage in ${{ github.repository }}.
+
+            A maintainer left feedback for the triage agent. Use that feedback to make the smallest durable improvement that helps future issue triage runs.
+
+            Trusted workflow context:
+            - Triggering feedback: triage_feedback.json
+            - Issue JSON: issue.json
+            - Issue comments JSON: issue_comments.json
+            - Core triage contract: .agents/skills/triage-issue/SKILL.md
+            - Editable repo-specific companion skill: .agents/skills/triage-issue-local/SKILL.md
+            - Editable label taxonomy: .github/issue-triage/config.json
+
+            You may only edit:
+            - .agents/skills/triage-issue-local/SKILL.md
+            - files under .github/issue-triage/
+
+            Do not edit .agents/skills/triage-issue/SKILL.md. Do not commit, push, create a branch, post comments, or open a pull request; the workflow will validate and publish any change. If the feedback is too specific or not useful as a repeatable triage heuristic, leave the working tree unchanged.
+          warp_api_key: ${{ secrets.WARP_API_KEY }}
+          share: team
+
+      - name: Guard self-improvement write surface
+        id: guard
+        run: |
+          changed="$(git diff --name-only)"
+          if [ -z "$changed" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          invalid="$(printf '%s\n' "$changed" | grep -Ev '^(\.agents/skills/triage-issue-local/|\.github/issue-triage/)' || true)"
+          if [ -n "$invalid" ]; then
+            printf 'Unexpected files changed:\n%s\n' "$invalid" >&2
+            exit 1
+          fi
+
+          if [ -f .github/issue-triage/config.json ]; then
+            jq empty .github/issue-triage/config.json
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create self-improvement pull request
+        if: steps.guard.outputs.has_changes == 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ github.token }}
+          base: ${{ github.event.repository.default_branch }}
+          branch: oz-agent/update-triage-${{ env.ISSUE_NUMBER }}
+          delete-branch: true
+          title: Improve Oz issue triage from feedback on #${{ env.ISSUE_NUMBER }}
+          commit-message: |
+            Improve Oz issue triage from feedback on #${{ env.ISSUE_NUMBER }}
+
+            Co-Authored-By: Oz <oz-agent@warp.dev>
+          body: |
+            This PR updates the repository-specific Oz issue triage guidance based on maintainer feedback on #${{ env.ISSUE_NUMBER }}.
+
+            The workflow only permits changes under `.agents/skills/triage-issue-local/` and `.github/issue-triage/`.
+
+            Co-Authored-By: Oz <oz-agent@warp.dev>
+
+      - name: Report self-improvement result
+        if: github.event_name == 'issue_comment'
+        run: |
+          if [ "${{ steps.guard.outputs.has_changes }}" = "true" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "Opened a self-improvement PR for future issue triage: ${{ steps.create_pr.outputs.pull-request-url }}"
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "I reviewed this triage feedback, but did not find a repeatable repo-specific heuristic to add yet."
+          fi

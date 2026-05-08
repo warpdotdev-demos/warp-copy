@@ -1,0 +1,102 @@
+name: Oz Issue Triage
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to triage
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    name: Triage issue with Oz
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number || github.event.inputs.issue_number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Collect issue context
+        run: |
+          gh api "repos/${{ github.repository }}/issues/${ISSUE_NUMBER}" > issue.json
+          gh api --paginate "repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments" > issue_comments.json
+
+      - name: Run issue triage agent
+        uses: warpdotdev/oz-agent-action@v1
+        with:
+          skill: triage-issue
+          prompt: |
+            You are running in a GitHub Actions issue triage workflow for ${{ github.repository }}.
+
+            Trusted workflow context:
+            - Issue JSON: issue.json
+            - Issue comments JSON: issue_comments.json
+            - Label taxonomy: .github/issue-triage/config.json
+            - Repository-specific guidance: .agents/skills/triage-issue-local/SKILL.md
+            - GitHub issue number: ${{ env.ISSUE_NUMBER }}
+
+            Produce a file named triage_result.json in the repository root. It must be valid JSON with this shape:
+            {
+              "labels": ["triaged"],
+              "reproducibility": "high|medium|low|unknown",
+              "confidence": "high|medium|low",
+              "related_files": ["path/to/file"],
+              "root_cause": "short evidence-based explanation",
+              "follow_up_questions": [{"question": "question for reporter", "reasoning": "why this is needed"}],
+              "duplicate_of": [{"number": 123, "title": "Existing issue title", "url": "https://github.com/owner/repo/issues/123", "reasoning": "why it matches"}],
+              "issue_body": "Markdown comment to post as the triage result"
+            }
+
+            Use only labels from .github/issue-triage/config.json unless the prompt explicitly justifies otherwise. Do not include ready-to-implement or ready-to-spec in the output labels. Validate triage_result.json with jq before finishing. Do not post comments, edit labels, commit, push, or open pull requests; the workflow will apply the result.
+          warp_api_key: ${{ secrets.WARP_API_KEY }}
+          share: team
+
+      - name: Validate triage result
+        run: |
+          jq -e '
+            (.labels | type == "array") and
+            (.follow_up_questions | type == "array") and
+            (.duplicate_of | type == "array") and
+            (.issue_body | type == "string")
+          ' triage_result.json
+
+      - name: Ensure configured labels exist
+        run: |
+          jq -r '.labels | to_entries[] | @base64' .github/issue-triage/config.json | while IFS= read -r encoded; do
+            label="$(printf '%s' "$encoded" | base64 --decode | jq -r '.key')"
+            color="$(printf '%s' "$encoded" | base64 --decode | jq -r '.value.color')"
+            description="$(printf '%s' "$encoded" | base64 --decode | jq -r '.value.description')"
+            if gh label list --search "$label" --json name --jq '.[].name' | grep -Fxq "$label"; then
+              gh label edit "$label" --color "$color" --description "$description"
+            else
+              gh label create "$label" --color "$color" --description "$description"
+            fi
+          done
+
+      - name: Apply triage result to issue
+        run: |
+          labels="$(jq -r '.labels[]?' triage_result.json | paste -sd, -)"
+          if [ -n "$labels" ]; then
+            gh issue edit "$ISSUE_NUMBER" --add-label "$labels"
+          fi
+
+          body="$(jq -r '.issue_body // empty' triage_result.json)"
+          if [ -n "$body" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "$body"
+          fi
+
+      - name: Upload triage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-result-${{ env.ISSUE_NUMBER }}
+          path: triage_result.json
+          if-no-files-found: error
