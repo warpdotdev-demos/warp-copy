@@ -28,7 +28,13 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate `ready-to-implement` and `ready-to-spec` during triage for both bug reports and enhancement requests, instead of relying on issue-template defaults. Apply them based on issue shape:
+
+- **Bug reports — `ready-to-implement`:** apply only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+- **Enhancement requests — `ready-to-implement`:** apply when the desired UX is concretely described, the scope is narrow, and no additional product or design decisions are required to begin work (for example, a self-contained accessibility option such as a built-in high-contrast theme, or a small additive setting with an obvious place to live). Omit it when the request needs scoping, UX exploration, or cross-surface design alignment.
+- **`ready-to-spec`:** apply on bug or enhancement reports when the desired end state is clear but the implementation path requires product or design alignment before code can be written. Typical shapes include error-message copy and recovery flows, new user-facing surfaces, or behavior changes whose UX wording or layout is undefined even though the underlying problem and audience are well understood.
+
+When in doubt between `ready-to-implement` and `ready-to-spec`, ask whether an engineer could begin work today without a product or design decision; if yes, prefer `ready-to-implement`, otherwise prefer `ready-to-spec`. Do not apply both at once.
 
 Use area labels based on the user's reported surface:
 
