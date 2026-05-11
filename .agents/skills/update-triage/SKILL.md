@@ -72,6 +72,5 @@ By default this targets the demo repo and looks back 7 days. It collects issues 
 
 - Re-read the updated `triage-issue-local` companion skill and confirm any new rules are explicit.
 - Keep the companion concise; do not turn it into a long style guide.
-- Do not commit, push, or open a PR yourself when running inside GitHub Actions. Leave edits in the working tree; the workflow will run a write-surface guard and open the pull request.
-- If the updates warrant a PR, the workflow will open it from `oz-agent/update-triage-*`.
 - Validate any temporary JSON with `jq` before relying on it.
+- If you made changes, make a draft PR.
