@@ -28,7 +28,12 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate `ready-to-implement` and `ready-to-spec` during triage instead of relying on issue-template defaults. Choose between them as follows:
+
+- Apply `ready-to-implement` when the desired behavior is concrete enough that an engineer could begin implementation without further product or design input. This applies to bug reports whose symptom is clearly described and whose likely fix surface is narrow, and to enhancement requests whose user-facing scope is well-defined (e.g. "add a built-in high-contrast theme", "fix clipping of CJK characters at the right edge of the AI panel"). A `repro:medium` label does not by itself preclude `ready-to-implement`: prefer it when the bug shape and fix path are clear, even when full step-by-step reproduction is not yet pinned down.
+- Apply `ready-to-spec` when the problem or feature is well-articulated and the expected user-facing behavior is described, but the solution still needs a product/tech spec or design decision before implementation can begin. A bug report whose remediation requires a deliberate UX or content decision (for example, replacing a raw error response with a friendly failure surface) is a `ready-to-spec` candidate even though the bug itself is reproducible.
+- Omit both labels and prefer `needs-info`, `needs-mocks`, or the appropriate `repro:*` label when the issue is not reproducible, lacks a clear fix path, requires substantial technical discovery, or needs UI mocks before either a spec or implementation can move forward.
+- `ready-to-implement` and `ready-to-spec` are mutually exclusive; never apply both to the same issue.
 
 Use area labels based on the user's reported surface:
 
