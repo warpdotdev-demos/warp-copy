@@ -28,7 +28,19 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. Apply `ready-to-implement` when the triage analysis identifies specific code paths involved and the likely fix is narrow enough to implement without a product spec or design mocks. Concrete signals that warrant `ready-to-implement`:
+
+- Bug reports where the root cause code path is identified and the fix is a localized change (e.g., rendering clipping, missing sanitization of a response body, off-by-one in a layout calculation).
+- Enhancement requests with small, well-scoped implementation (e.g., adding a new theme variant, exposing an existing setting, supporting an additional file format) where the desired behavior is self-evident.
+- Duplicate issues can still receive `ready-to-implement` when the underlying work is straightforward, even though they will be closed in favor of the canonical issue.
+
+If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+
+Evaluate `ready-to-spec` during triage when the issue's problem statement and expected behavior are well-defined, the triage analysis has identified relevant code and plausible fix directions, but the solution involves product or design decisions that should be documented before implementation begins. Signals for `ready-to-spec`:
+
+- The issue describes clear user-facing behavior changes (e.g., replacing raw error output with a friendly message) where the exact copy, UX flow, or error-handling strategy needs a spec to align stakeholders.
+- Multiple viable fix approaches exist at different architectural layers and a spec is needed to choose among them.
+- The issue is well-enough understood that it does not need `needs-info`, but the fix is not narrow enough for `ready-to-implement`.
 
 Use area labels based on the user's reported surface:
 
