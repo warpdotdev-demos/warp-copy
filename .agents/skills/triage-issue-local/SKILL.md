@@ -28,7 +28,16 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate `ready-to-implement` and `ready-to-spec` during triage instead of relying on issue-template defaults.
+
+Apply `ready-to-implement` when the work is scoped clearly enough that an engineer could start without a separate product spec or design mocks:
+
+- For bug reports, the issue should be reproducible from the provided evidence or straightforward local verification (including visual symptoms with a clear screenshot or recording, even when reproducibility is `repro:medium`) and the likely fix should be narrow. A defined visual regression such as text clipping at a panel edge qualifies.
+- For enhancement requests, the desired UX, scope boundaries, and success criteria should be unambiguous from the report — for example a self-contained addition like a new built-in theme, a new keybinding, or a small settings toggle. Apply `ready-to-implement` for such requests even when `duplicate` is also being applied.
+
+Apply `ready-to-spec` when the report describes a real, well-defined problem or feature whose direction is clear from the reporter, but the implementation still requires product or technical decisions before code can be written. Typical signals include error-UX issues where the reporter has shown the bad state and described what they expected (for example, replacing a raw error response with a friendly message) but the exact copy, surface, iconography, or fallback behavior still needs to be designed.
+
+If the issue is not reproducible, lacks a clear fix path, requires UI mocks, or needs deeper technical discovery, omit both labels and prefer `needs-info`, `needs-mocks`, or the appropriate `repro:*` label.
 
 Use area labels based on the user's reported surface:
 
