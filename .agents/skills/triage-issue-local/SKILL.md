@@ -30,6 +30,8 @@ The label taxonomy for this repository is managed in `.github/issue-triage/confi
 
 Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
 
+Evaluate `ready-to-spec` during triage when the report describes a clearly understood product behavior whose design requirements are already well-defined enough that a maintainer could draft a product or technical spec directly from the issue, but where the next required step is a written spec rather than direct implementation — for example because the change is broader than a localized fix, spans multiple surfaces, or requires UX, copy, or API decisions before code work. Apply `ready-to-spec` in those cases instead of `ready-to-implement`, and never apply both on the same issue. If the desired behavior is unclear, the report is not reproducible, or the surface needs visual mocks, prefer `needs-info`, `needs-mocks`, or the appropriate `repro:*` label instead.
+
 Use area labels based on the user's reported surface:
 
 - `area:shell-terminal` for terminal output, block rendering, shell integration, prompt rendering, command execution display, and terminal-emulation behavior.
