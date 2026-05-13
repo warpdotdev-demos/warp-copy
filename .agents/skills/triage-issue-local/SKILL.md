@@ -28,7 +28,13 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate both `ready-to-implement` and `ready-to-spec` during triage instead of relying on issue-template defaults; in this repository these labels are agent-applicable when the evidence supports them.
+
+Apply `ready-to-implement` when the desired behavior is concretely described, the scope is narrow enough to land without a product spec or new design mocks, and the fix path is clear from the provided evidence or straightforward local verification. This applies to bug reports that are reproducible with a narrow fix and to enhancement requests whose ask is well-bounded with no open UX decisions (for example, adding a built-in variant of an existing pattern such as a high-contrast color theme).
+
+Apply `ready-to-spec` when the issue describes a real problem with clear functional requirements but implementation still requires product or design decisions before a fix can begin — for example, choosing the exact copy, visual treatment, or fallback behavior of a new user-facing error message, or shaping a new UX surface whose layout is not yet specified. Prefer `ready-to-spec` over `ready-to-implement` whenever the desired outcome is well-understood but the concrete UI/UX shape is not.
+
+Otherwise — if the bug is not reproducible, the fix path is unclear, or deeper technical discovery is required — omit both labels and prefer `needs-info`, `needs-mocks`, or the appropriate `repro:*` label.
 
 Use area labels based on the user's reported surface:
 
