@@ -28,7 +28,13 @@ Ask **at most 2 follow-up questions** per triage response. Each question must be
 
 The label taxonomy for this repository is managed in `.github/issue-triage/config.json`. Prefer labels from that configuration, especially the `area:*`, `os:*`, `repro:*`, `accessibility`, `needs-info`, `duplicate`, and primary issue-type labels. Do not invent new labels unless the prompt explicitly allows it.
 
-Evaluate `ready-to-implement` during triage instead of relying on issue-template defaults. For bug reports, apply `ready-to-implement` only when the issue is reproducible from the provided evidence or straightforward local verification and the likely fix appears narrow enough to implement without a product spec, design mocks, or substantial investigation. If the bug is not reproducible, lacks a clear fix path, requires product/design decisions, or needs deeper technical discovery, omit `ready-to-implement` and prefer `needs-info`, `ready-to-spec`, `needs-mocks`, or the appropriate `repro:*` label.
+Evaluate `ready-to-implement` and `ready-to-spec` during triage instead of relying on issue-template defaults.
+
+Apply `ready-to-implement` when the issue is reproducible from the provided evidence (or straightforward local verification) and the likely fix is narrow enough to implement without a product spec, design mocks, or substantial investigation. Well-scoped visual or rendering bugs with clear evidence — clipping, layout regressions, focus/cursor glitches, observable UI defects on a specific surface — typically qualify even when they touch UI code, as long as the desired behavior is obvious from the report.
+
+Apply `ready-to-spec` when the report describes a clearly defined problem and a clear desired outcome, but the implementation requires product or design decisions before code work — for example, error-message UX (raw protocol/HTML responses surfaced to the user), missing user-facing flows, or behavior changes whose shape needs a short spec. Prefer `ready-to-spec` over `needs-info` when the problem and desired outcome are already obvious and only the spec/design is missing.
+
+If the bug is not reproducible, lacks a clear fix path, or needs deeper technical discovery, omit both labels and prefer `needs-info`, `needs-mocks`, or the appropriate `repro:*` label. `ready-to-implement` and `ready-to-spec` are mutually exclusive — never apply both.
 
 Use area labels based on the user's reported surface:
 
