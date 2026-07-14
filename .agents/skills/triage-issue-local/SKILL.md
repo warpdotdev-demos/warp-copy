@@ -60,7 +60,7 @@ Before asking the reporter for more information, check the issue body, comments,
 
 ## Recurring follow-up patterns
 
-- Visual UI/rendering issue with no media: ask for a screenshot or short screen recording first.
+- Bug report with a visible or UI-observable symptom and no screenshot or recording attached: always request a screenshot or short screen recording as one of the prioritized follow-up questions. This applies not only to rendering or layout bugs but also to visible state, stale-view, or refresh/update bugs (for example, a file tree or panel that does not update), even when the suspected root cause is non-visual.
 - Environment-sensitive terminal issue: ask for Warp version/channel, OS/version, shell, and whether it reproduces in a fresh local session.
 - SSH/tmux/remote issue: ask for local OS, remote OS, shell, whether tmux is involved, and the minimal command or workflow that reproduces it.
 - Agent/MCP issue: ask for the failing workflow, local vs cloud execution, relevant session link, MCP server/tool name, and any redacted error text.
